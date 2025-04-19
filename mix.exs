@@ -22,9 +22,13 @@ defmodule EyeSeeYou.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:ecto, "~> 3.12"},
+      {:ecto_sql, "~> 3.12"},
+      {:httpoison, "~> 2.0"},
+      {:jason, "~> 1.4"},
+      {:uuid, "~> 1.1"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end

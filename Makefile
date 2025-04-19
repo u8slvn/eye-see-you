@@ -10,7 +10,7 @@ init-pre-commit: ## Init pre-commit.
 .PHONY: test
 test: ## Run tests.
 	@mix dialyzer
-	@mix test
+	@mix test --trace
 
 .PHONY: format
 format: ## Format code.
