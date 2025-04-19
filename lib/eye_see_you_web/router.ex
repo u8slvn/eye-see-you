@@ -14,6 +14,12 @@ defmodule EyeSeeYouWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  scope "/api", EyeSeeYouWeb.API do
+    pipe_through(:api)
+
+    resources("/sentinels", SentinelController, except: [:new, :edit])
+  end
+
   scope "/", EyeSeeYouWeb do
     pipe_through(:browser)
 

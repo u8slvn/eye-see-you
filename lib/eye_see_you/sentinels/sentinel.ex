@@ -35,3 +35,9 @@ defmodule EyeSeeYou.Sentinels.Sentinel do
     end)
   end
 end
+
+defimpl Phoenix.Param, for: EyeSeeYou.Sentinels.Sentinel do
+  def to_param(%{uuid: uuid}) do
+    "#{uuid}"
+  end
+end
