@@ -1,0 +1,35 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_stages: [commit]
+repos:
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v5.0.0
+      hooks:
+        -   id: trailing-whitespace
+        -   id: end-of-file-fixer
+        -   id: check-yaml
+        -   id: check-toml
+        -   id: check-added-large-files
+
+  -   repo: local
+      hooks:
+        -   id: mix-format
+            name: Elixir Format
+            entry: mix format
+            language: system
+            files: \.(ex|exs)$
+            pass_filenames: false
+
+        -   id: mix-credo
+            name: Elixir Credo
+            entry: mix credo
+            language: system
+            files: \.(ex|exs)$
+            pass_filenames: false
+            args: [--strict]
+
+  -   repo: https://github.com/compilerla/conventional-pre-commit
+      rev: v4.0.0
+      hooks:
+        -   id: conventional-pre-commit
+            stages: [commit-msg]
