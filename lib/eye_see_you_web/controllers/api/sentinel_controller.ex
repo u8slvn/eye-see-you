@@ -11,7 +11,7 @@ defmodule EyeSeeYouWeb.API.SentinelController do
     render(conn, :index, sentinels: sentinels)
   end
 
-  def show(conn, %{"id" => uuid}) do
+  def show(conn, %{"uuid" => uuid}) do
     with {:ok, %Sentinel{} = sentinel} <- Sentinels.Repository.get_sentinel(uuid) do
       render(conn, :show, sentinel: sentinel)
     end
