@@ -41,7 +41,11 @@ ci: format lint test ## Run CI.
 
 .PHONY: run
 run: ## Run the application.
-	@mix run --no-halt
+	@mix phx.server
+
+.PHONY: reset-db
+reset-db: ## Reset the database.
+	@mix do ecto.drop, ecto.create, ecto.migrate
 
 .PHONY: iex
 iex: ## Start interactive Elixir shell with project loaded.

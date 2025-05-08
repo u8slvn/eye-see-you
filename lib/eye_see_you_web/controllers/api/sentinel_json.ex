@@ -13,9 +13,28 @@ defmodule EyeSeeYouWeb.API.SentinelJSON do
     %{
       uuid: sentinel.uuid,
       name: sentinel.name,
-      url: sentinel.url,
       interval: sentinel.interval,
-      expected_status: sentinel.expected_status
+      config: render_config(sentinel.config)
+    }
+  end
+
+  defp render_config(config) do
+    case config do
+      nil ->
+        nil
+
+      config ->
+        %{
+          type: config.type,
+          data: render_config_data(config.type, config.data)
+        }
+    end
+  end
+
+  defp render_config_data("simple_http_status", data) do
+    %{
+      url: data.url,
+      expected_status: data.expected_status
     }
   end
 end

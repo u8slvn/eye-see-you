@@ -5,9 +5,8 @@ defmodule EyeSeeYou.Repo.Migrations.CreateSentinels do
     create table(:sentinels, primary_key: false) do
       add :uuid, :binary_id, primary_key: true
       add :name, :string, null: false
-      add :url, :string, null: false
       add :interval, :integer, default: 60
-      add :expected_status, :integer, default: 200
+      add :config, :map, null: false, default: "{}"
 
       timestamps()
     end

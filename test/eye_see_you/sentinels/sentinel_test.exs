@@ -4,34 +4,71 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
 
   describe "Sentinel.changeset" do
     test "creates a valid changeset with proper attributes" do
-      attrs = %{name: "API Test", url: "https://example.com/api"}
+      attrs = %{
+        name: "API Test",
+        config: %{
+          type: "simple_http_status",
+          data: %{
+            url: "https://example.com/api",
+            expected_status: 200
+          }
+        }
+      }
+
       changeset = Sentinel.changeset(%Sentinel{}, attrs)
 
       assert changeset.valid?
     end
 
     test "sets default values when not provided" do
-      attrs = %{name: "API Test", url: "https://example.com/api"}
+      attrs = %{
+        name: "API Test",
+        config: %{
+          type: "simple_http_status",
+          data: %{url: "https://example.com/api"}
+        }
+      }
+
       changeset = Sentinel.changeset(%Sentinel{}, attrs)
 
-      # Get the changes map to see what would be inserted
       changes = changeset.changes
-
-      # Default values should not be in changes since they're schema defaults
       refute Map.has_key?(changes, :interval)
-      refute Map.has_key?(changes, :expected_status)
+
+      config_changes = changes.config.changes
+      data_changes = config_changes.data.changes
+      refute Map.has_key?(data_changes, :expected_status)
     end
 
     test "validates required fields" do
       # Missing name
-      changeset = Sentinel.changeset(%Sentinel{}, %{url: "https://example.com"})
+      changeset =
+        Sentinel.changeset(%Sentinel{}, %{
+          config: %{
+            type: "simple_http_status",
+            data: %{url: "https://example.com"}
+          }
+        })
+
       refute changeset.valid?
       assert "can't be blank" in errors_on(changeset).name
 
-      # Missing url
+      # Missing config
       changeset = Sentinel.changeset(%Sentinel{}, %{name: "API Test"})
       refute changeset.valid?
-      assert "can't be blank" in errors_on(changeset).url
+      assert "can't be blank" in errors_on(changeset).config
+
+      # Missing url in config data
+      changeset =
+        Sentinel.changeset(%Sentinel{}, %{
+          name: "API Test",
+          config: %{
+            type: "simple_http_status",
+            data: %{}
+          }
+        })
+
+      refute changeset.valid?
+      assert "can't be blank" in errors_on(changeset).config.data.url
     end
 
     test "validates url format" do
@@ -39,36 +76,79 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
       changeset =
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
-          url: "example.com"
+          config: %{
+            type: "simple_http_status",
+            data: %{url: "example.com"}
+          }
         })
 
       refute changeset.valid?
-      assert "is not a valid HTTP URL" in errors_on(changeset).url
+      assert "is not a valid HTTP URL" in errors_on(changeset).config.data.url
 
       # Invalid URL (wrong scheme)
       changeset =
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
-          url: "ftp://example.com"
+          config: %{
+            type: "simple_http_status",
+            data: %{url: "ftp://example.com"}
+          }
         })
 
       refute changeset.valid?
-      assert "is not a valid HTTP URL" in errors_on(changeset).url
+      assert "is not a valid HTTP URL" in errors_on(changeset).config.data.url
     end
 
     test "allows customizing interval and expected_status" do
       attrs = %{
         name: "API Test",
-        url: "https://example.com/api",
         interval: 30,
-        expected_status: 201
+        config: %{
+          type: "simple_http_status",
+          data: %{
+            url: "https://example.com/api",
+            expected_status: 201
+          }
+        }
       }
 
       changeset = Sentinel.changeset(%Sentinel{}, attrs)
 
       assert changeset.valid?
       assert changeset.changes.interval == 30
-      assert changeset.changes.expected_status == 201
+      assert changeset.changes.config.changes.data.changes.expected_status == 201
+    end
+
+    test "validates configuration type" do
+      changeset =
+        Sentinel.changeset(%Sentinel{}, %{
+          name: "API Test",
+          config: %{
+            type: "invalid_type",
+            data: %{url: "https://example.com"}
+          }
+        })
+
+      refute changeset.valid?
+      assert "must be a supported configuration type" in errors_on(changeset).config.type
+    end
+
+    test "validates expected_status is a valid HTTP status code" do
+      changeset =
+        Sentinel.changeset(%Sentinel{}, %{
+          name: "API Test",
+          config: %{
+            type: "simple_http_status",
+            data: %{
+              url: "https://example.com",
+              expected_status: 999
+            }
+          }
+        })
+
+      refute changeset.valid?
+
+      assert "must be a valid HTTP status code (100-599)" in errors_on(changeset).config.data.expected_status
     end
   end
 
