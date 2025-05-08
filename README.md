@@ -1,18 +1,8 @@
 # EyeSeeYou
 
-To start your Phoenix server:
+<p align="center">
+    <a href="https://github.com/u8slvn/eye-see-you/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/u8slvn/eye-see-you/ci.yml?label=CI" alt="CI"></a>
+    <a href="https://github.com/u8slvn/eye-see-you"><img alt="GitHub License" src="https://img.shields.io/github/license/u8slvn/eye-see-you"></a>
+</p>
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+[WIP]
