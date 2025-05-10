@@ -56,7 +56,7 @@ jobs:
         run: mix compile --warnings-as-errors
 
       - name: Run tests
-        run: mix test
+        run: mix test --trace
         env:
           MIX_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/eye_see_you_test
