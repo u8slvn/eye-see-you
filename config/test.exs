@@ -20,12 +20,6 @@ config :eye_see_you, EyeSeeYouWeb.Endpoint,
   secret_key_base: "+dZbxvxz9kVKL1PlIc0BBicAR6l02Y6CZA79C7ijzTdO7VCuFL6uXwRCpA/h55x9",
   server: false
 
-# In test we don't send emails
-config :eye_see_you, EyeSeeYou.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters
-config :swoosh, :api_client, false
-
 # Print only warnings and errors during test
 config :logger, level: :warning
 
