@@ -14,8 +14,11 @@ defmodule EyeSeeYou.Application do
       {Phoenix.PubSub, name: EyeSeeYou.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: EyeSeeYou.Finch},
-      # Start a worker by calling: EyeSeeYou.Worker.start_link(arg)
-      # {EyeSeeYou.Worker, arg},
+      {Registry, keys: :unique, name: EyeSeeYou.SentinelRegistry},
+      EyeSeeYou.Sentinels.Workers.SentinelSupervisor,
+      EyeSeeYou.Sentinels.Services.StatusCache,
+      # Initialize sentinels after all infrastructure is ready
+      {Task, &EyeSeeYou.Sentinels.init_sentinels/0},
       # Start to serve requests, typically the last entry
       EyeSeeYouWeb.Endpoint
     ]

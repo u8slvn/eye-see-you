@@ -17,7 +17,7 @@ defmodule EyeSeeYouWeb.Router do
   scope "/api", EyeSeeYouWeb.API do
     pipe_through(:api)
 
-    resources("/sentinels", SentinelController, param: "uuid", except: [:new, :edit])
+    resources("/sentinels", Sentinel.SentinelController, param: "uuid", except: [:new, :edit])
   end
 
   scope "/", EyeSeeYouWeb do

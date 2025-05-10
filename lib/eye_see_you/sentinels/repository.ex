@@ -5,7 +5,7 @@ defmodule EyeSeeYou.Sentinels.Repository do
 
   import Ecto.Query, warn: false
   alias EyeSeeYou.Repo
-  alias EyeSeeYou.Sentinels.Sentinel
+  alias EyeSeeYou.Sentinels.Models.Sentinel
 
   @doc """
   Returns the list of sentinels.

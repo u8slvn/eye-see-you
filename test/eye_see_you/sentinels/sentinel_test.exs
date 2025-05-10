@@ -1,22 +1,23 @@
 defmodule EyeSeeYou.Sentinels.SentinelTest do
-  use ExUnit.Case
-  alias EyeSeeYou.Sentinels.Sentinel
+  use EyeSeeYou.DataCase, async: true
+  alias EyeSeeYou.Sentinels.Models.Sentinel
 
   describe "Sentinel.changeset" do
     test "creates a valid changeset with proper attributes" do
       attrs = %{
-        name: "API Test",
+        name: "Test Sentinel",
+        interval: 60,
+        status: :active,
         config: %{
-          type: "simple_http_status",
+          type: "http_request",
           data: %{
-            url: "https://example.com/api",
+            url: "https://example.com",
             expected_status: 200
           }
         }
       }
 
       changeset = Sentinel.changeset(%Sentinel{}, attrs)
-
       assert changeset.valid?
     end
 
@@ -24,7 +25,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
       attrs = %{
         name: "API Test",
         config: %{
-          type: "simple_http_status",
+          type: "http_request",
           data: %{url: "https://example.com/api"}
         }
       }
@@ -44,7 +45,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
       changeset =
         Sentinel.changeset(%Sentinel{}, %{
           config: %{
-            type: "simple_http_status",
+            type: "http_request",
             data: %{url: "https://example.com"}
           }
         })
@@ -62,7 +63,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
           config: %{
-            type: "simple_http_status",
+            type: "http_request",
             data: %{}
           }
         })
@@ -77,7 +78,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
           config: %{
-            type: "simple_http_status",
+            type: "http_request",
             data: %{url: "example.com"}
           }
         })
@@ -90,7 +91,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
           config: %{
-            type: "simple_http_status",
+            type: "http_request",
             data: %{url: "ftp://example.com"}
           }
         })
@@ -104,7 +105,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
         name: "API Test",
         interval: 30,
         config: %{
-          type: "simple_http_status",
+          type: "http_request",
           data: %{
             url: "https://example.com/api",
             expected_status: 201
@@ -138,7 +139,7 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
         Sentinel.changeset(%Sentinel{}, %{
           name: "API Test",
           config: %{
-            type: "simple_http_status",
+            type: "http_request",
             data: %{
               url: "https://example.com",
               expected_status: 999
@@ -150,14 +151,5 @@ defmodule EyeSeeYou.Sentinels.SentinelTest do
 
       assert "must be a valid HTTP status code (100-599)" in errors_on(changeset).config.data.expected_status
     end
-  end
-
-  # Helper function to extract errors from a changeset
-  defp errors_on(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
-        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
-      end)
-    end)
   end
 end
