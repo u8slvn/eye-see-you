@@ -31,11 +31,11 @@ defmodule EyeSeeYou.Validators.JsonValidator do
     if is_nil(payload) or payload == "" do
       changeset
     else
-      try do
-        Jason.decode!(payload)
-        changeset
-      rescue
-        error in Jason.DecodeError ->
+      case Jason.decode(payload) do
+        {:ok, _} ->
+          changeset
+
+        {:error, error} ->
           error_message = Exception.message(error)
           add_error(changeset, field, "is not valid JSON: #{error_message}")
       end

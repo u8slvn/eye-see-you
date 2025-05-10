@@ -10,7 +10,9 @@ defmodule EyeSeeYou.Validators.UrlValidator do
   @spec valid_http_url?(String.t()) :: boolean()
   def valid_http_url?(url) when is_binary(url) do
     uri = URI.parse(url)
-    not is_nil(uri.scheme) and not is_nil(uri.host) and uri.scheme in ["http", "https"]
+
+    not is_nil(uri.scheme) and uri.scheme in ["http", "https"] and not is_nil(uri.host) and
+      uri.host != ""
   end
 
   def valid_http_url?(_), do: false
