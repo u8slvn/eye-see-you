@@ -6,7 +6,7 @@ defmodule EyeSeeYou.Sentinels.Models.Sentinel do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias EyeSeeYou.Sentinels.Models.Config
+  alias EyeSeeYou.Sentinels.Models.ProtocolConfig
 
   @status_values [:active, :paused, :error]
 
@@ -17,7 +17,7 @@ defmodule EyeSeeYou.Sentinels.Models.Sentinel do
     field(:name, :string)
     field(:interval, :integer, default: 60)
     field(:status, Ecto.Enum, values: @status_values, default: :active)
-    embeds_one(:config, Config, on_replace: :update)
+    embeds_one(:protocol, ProtocolConfig, on_replace: :update)
 
     timestamps()
   end
@@ -30,7 +30,7 @@ defmodule EyeSeeYou.Sentinels.Models.Sentinel do
       greater_than: 0,
       message: "must be a valid positive integer greater than 0"
     )
-    |> cast_embed(:config, required: true)
+    |> cast_embed(:protocol, required: true)
   end
 end
 

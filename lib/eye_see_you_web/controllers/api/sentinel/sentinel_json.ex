@@ -21,7 +21,7 @@ defmodule EyeSeeYouWeb.API.Sentinel.SentinelJSON do
       name: sentinel.name,
       interval: sentinel.interval,
       status: sentinel.status,
-      config: render_config(sentinel.config)
+      protocol: render_protocol(sentinel.protocol)
     }
 
     base
@@ -29,31 +29,31 @@ defmodule EyeSeeYouWeb.API.Sentinel.SentinelJSON do
     |> maybe_add_field(sentinel, :last_check_timestamp)
   end
 
-  defp render_config(config) do
-    case config do
+  defp render_protocol(protocol) do
+    case protocol do
       nil ->
         nil
 
-      config ->
+      protocol ->
         %{
-          type: config.type,
-          data: render_config_data(config.type, config.data)
+          type: protocol.type,
+          protocol: render_protocol_config(protocol.type, protocol.config)
         }
     end
   end
 
-  defp render_config_data("http", data), do: render_http_request_data(data)
+  defp render_protocol_config("http", config), do: render_http_config(config)
 
-  defp render_http_request_data(data) do
+  defp render_http_config(config) do
     base = %{
-      url: data.url,
-      expected_status: data.expected_status
+      url: config.url,
+      expected_status: config.expected_status
     }
 
     base
-    |> maybe_add_field(data, :method, "GET")
-    |> maybe_add_headers(data)
-    |> maybe_add_field(data, :payload)
+    |> maybe_add_field(config, :method, "GET")
+    |> maybe_add_headers(config)
+    |> maybe_add_field(config, :payload)
   end
 
   # Helper functions
@@ -68,8 +68,8 @@ defmodule EyeSeeYouWeb.API.Sentinel.SentinelJSON do
     end
   end
 
-  defp maybe_add_headers(map, data) do
-    headers = Map.get(data, :headers, [])
+  defp maybe_add_headers(map, config) do
+    headers = Map.get(config, :headers, [])
 
     if Enum.empty?(headers) do
       map

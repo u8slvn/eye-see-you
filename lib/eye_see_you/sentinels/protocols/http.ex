@@ -12,9 +12,9 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocol do
     ssl: [verify: :verify_peer]
   ]
 
-  def perform_check(config) do
+  def perform_check(protocol) do
     start_time = System.monotonic_time()
-    result = make_http_request(config.data)
+    result = make_http_request(protocol.config)
     end_time = System.monotonic_time()
 
     duration_ms = System.convert_time_unit(end_time - start_time, :native, :millisecond)
@@ -29,17 +29,17 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocol do
   end
 
   @spec check_success?(any(), any()) :: boolean()
-  def check_success?(result, config) do
-    result.status_code == config.data.expected_status
+  def check_success?(result, protocol) do
+    result.status_code == protocol.config.expected_status
   end
 
-  defp make_http_request(data) do
-    headers = format_headers(data.headers)
-    method = String.to_atom(String.downcase(data.method))
+  defp make_http_request(config) do
+    headers = format_headers(config.headers)
+    method = String.to_atom(String.downcase(config.method))
     options = @default_http_options
 
     try do
-      case do_request(method, data.url, headers, data.payload, options) do
+      case do_request(method, config.url, headers, config.payload, options) do
         {:ok, %{status_code: status_code, body: body}} ->
           %{status_code: status_code, body: body, error: nil}
 

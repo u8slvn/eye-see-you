@@ -12,7 +12,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
         headers: []
       }
 
-      config = build_config("GET", "https://example.com", 200)
+      config = build_protocol_config("GET", "https://example.com", 200)
 
       with_mock HTTPoison, get: fn _url, _headers, _options -> {:ok, http_response} end do
         result = HttpProtocol.perform_check(config)
@@ -26,7 +26,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
     end
 
     test "failed HTTP request" do
-      config = build_config("GET", "https://non-existent-domain.example", 200)
+      config = build_protocol_config("GET", "https://non-existent-domain.example", 200)
 
       with_mock HTTPoison,
         get: fn _url, _headers, _options ->
@@ -43,7 +43,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
     end
 
     test "HTTP request with exception" do
-      config = build_config("GET", "https://example.com", 200)
+      config = build_protocol_config("GET", "https://example.com", 200)
 
       with_mock HTTPoison,
         get: fn _url, _headers, _options ->
@@ -66,7 +66,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
         headers: []
       }
 
-      config = build_config("POST", "https://example.com/api", 201, "data=test")
+      config = build_protocol_config("POST", "https://example.com/api", 201, "data=test")
 
       with_mock HTTPoison, post: fn _url, _body, _headers, _options -> {:ok, http_response} end do
         result = HttpProtocol.perform_check(config)
@@ -89,7 +89,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
         %{"name" => "Content-Type", "value" => "application/json"}
       ]
 
-      config = build_config("GET", "https://example.com", 200, nil, headers)
+      config = build_protocol_config("GET", "https://example.com", 200, nil, headers)
 
       with_mock HTTPoison,
         get: fn _url, headers, _options ->
@@ -104,21 +104,21 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
 
   describe "check_success?/2" do
     test "returns true when status code matches expected status" do
-      config = build_config("GET", "https://example.com", 200)
+      config = build_protocol_config("GET", "https://example.com", 200)
       result = %{status_code: 200}
 
       assert HttpProtocol.check_success?(result, config) == true
     end
 
     test "returns false when status code doesn't match expected status" do
-      config = build_config("GET", "https://example.com", 200)
+      config = build_protocol_config("GET", "https://example.com", 200)
       result = %{status_code: 404}
 
       assert HttpProtocol.check_success?(result, config) == false
     end
 
     test "returns false when status code is nil (request failed)" do
-      config = build_config("GET", "https://example.com", 200)
+      config = build_protocol_config("GET", "https://example.com", 200)
       result = %{status_code: nil}
 
       assert HttpProtocol.check_success?(result, config) == false
@@ -126,8 +126,8 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
   end
 
   # Helper functions
-  defp build_config(method, url, expected_status, payload \\ nil, headers \\ []) do
-    data = %{
+  defp build_protocol_config(method, url, expected_status, payload \\ nil, headers \\ []) do
+    config = %{
       method: method,
       url: url,
       payload: payload,
@@ -137,7 +137,7 @@ defmodule EyeSeeYou.Sentinels.Protoccols.HttpProtocolTest do
 
     %{
       type: "http_request",
-      data: struct(EyeSeeYou.Sentinels.Models.Config.HttpRequest, data)
+      config: struct(EyeSeeYou.Sentinels.Models.ProtocolConfig.HttpRequest, config)
     }
   end
 end

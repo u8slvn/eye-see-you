@@ -78,11 +78,10 @@ defmodule EyeSeeYou.Sentinels.Workers.SentinelWorker do
 
   defp perform_check(state) do
     sentinel = state.sentinel
-    config = sentinel.config
 
-    protocol = get_protocol(sentinel)
-    result = protocol.perform_check(config)
-    success = protocol.check_success?(result, config)
+    protocol = get_protocol(sentinel.protocol)
+    result = protocol.perform_check(sentinel.protocol)
+    success = protocol.check_success?(result, sentinel.protocol)
     check_result = Map.put(result, :success, success)
 
     StatusCache.set_check_result(sentinel.uuid, check_result)
@@ -108,7 +107,7 @@ defmodule EyeSeeYou.Sentinels.Workers.SentinelWorker do
 
     log_message = "Sentinel #{sentinel.name}(#{sentinel.uuid}): #{status}"
 
-    expected = sentinel.config.data.expected_status
+    expected = sentinel.protocol.config.expected_status
 
     "#{log_message} - HTTP #{result.status_code} (expected: #{expected}) in #{result.duration_ms}ms"
 

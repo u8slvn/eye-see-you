@@ -7,7 +7,7 @@ defmodule EyeSeeYou.Repo.Migrations.CreateSentinels do
       add :name, :string, null: false
       add :interval, :integer, default: 60
       add :status, :string, null: false, default: "active"
-      add :config, :map, null: false, default: "{}"
+      add :protocol, :map, null: false, default: "{}"
 
       timestamps()
     end

@@ -1,55 +1,42 @@
-defmodule EyeSeeYou.Sentinels.Models.Config do
+defmodule EyeSeeYou.Sentinels.Models.ProtocolConfig do
   @moduledoc """
   Configuration schemas for sentinels.
   """
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias EyeSeeYou.Sentinels.Models.Config.HttpRequest
+  alias EyeSeeYou.Sentinels.Models.ProtocolConfig.HttpRequest
 
   @primary_key false
   embedded_schema do
     field(:type, :string, default: "http")
-    embeds_one(:data, HttpRequest, on_replace: :update)
+    embeds_one(:config, HttpRequest, on_replace: :update)
   end
 
-  @spec changeset(
-          {map(),
-           %{
-             optional(atom()) =>
-               atom()
-               | {:array | :assoc | :embed | :in | :map | :parameterized | :supertype | :try,
-                  any()}
-           }}
-          | %{
-              :__struct__ => atom() | %{:__changeset__ => any(), optional(any()) => any()},
-              optional(atom()) => any()
-            },
-          %{optional(:__struct__) => none(), optional(atom() | binary()) => any()}
-        ) :: Ecto.Changeset.t()
-  def changeset(config, attrs) do
-    type = attrs["type"] || attrs[:type]
+  def changeset(protocol, attrs) do
+    type = attrs["type"] || attrs[:type] || "http"
 
-    config
+    protocol
     |> cast(attrs, [:type])
     |> validate_required([:type])
+    |> validate_required([:config])
     |> validate_inclusion(:type, ["http", "tcp", "udp"],
-      message: "must be a supported configuration type"
+      message: "must be a supported configuration type (http, tcp, udp)"
     )
-    |> maybe_cast_data(attrs, type)
+    |> maybe_cast_config(attrs, type)
   end
 
-  defp maybe_cast_data(changeset, _attrs, "http") do
+  defp maybe_cast_config(changeset, _attrs, "http") do
     changeset
-    |> cast_embed(:data, with: &HttpRequest.changeset/2)
+    |> cast_embed(:config, with: &HttpRequest.changeset/2)
   end
 
-  defp maybe_cast_data(changeset, _attrs, _invalid_type) do
+  defp maybe_cast_config(changeset, _attrs, _invalid_type) do
     changeset
   end
 end
 
-defmodule EyeSeeYou.Sentinels.Models.Config.HttpRequest do
+defmodule EyeSeeYou.Sentinels.Models.ProtocolConfig.HttpRequest do
   @moduledoc """
   HttpRequest configuration type for monitoring HTTP endpoints.
   """
