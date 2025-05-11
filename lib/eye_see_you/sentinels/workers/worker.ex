@@ -1,18 +1,13 @@
 defmodule EyeSeeYou.Sentinels.Workers.SentinelWorker do
   @moduledoc """
-  GenServer worker responsible for checking a sentinel's HTTP endpoint.
+  GenServer worker responsible for running sentinel protocol.
   """
   use GenServer
   require Logger
 
+  alias EyeSeeYou.Sentinels.Protoccols.HttpProtocol
   alias EyeSeeYou.Sentinels.Repository
   alias EyeSeeYou.Sentinels.Services.StatusCache
-
-  @default_http_options [
-    recv_timeout: 15_000,
-    timeout: 15_000,
-    ssl: [verify: :verify_peer]
-  ]
 
   def start_link(sentinel) do
     GenServer.start_link(__MODULE__, sentinel, name: via_tuple(sentinel.uuid))
@@ -84,27 +79,17 @@ defmodule EyeSeeYou.Sentinels.Workers.SentinelWorker do
   defp perform_check(state) do
     sentinel = state.sentinel
     config = sentinel.config
-    start_time = System.monotonic_time()
-    result = make_http_request(config.data)
-    end_time = System.monotonic_time()
 
-    duration_ms = System.convert_time_unit(end_time - start_time, :native, :millisecond)
-
-    check_result = %{
-      timestamp: DateTime.utc_now(),
-      duration_ms: duration_ms,
-      status_code: result.status_code,
-      success: result.status_code == config.data.expected_status,
-      error: result.error
-    }
+    protocol = get_protocol(sentinel)
+    result = protocol.perform_check(config)
+    success = protocol.check_success?(result, config)
+    check_result = Map.put(result, :success, success)
 
     StatusCache.set_check_result(sentinel.uuid, check_result)
 
-    # Update sentinel status if needed
     new_status = if check_result.success, do: :active, else: :error
 
     if new_status != state.status do
-      # Update sentinel status in database if it changed
       updated_sentinel = %{sentinel | status: new_status}
       Repository.update_sentinel(updated_sentinel, %{status: new_status})
     end
@@ -114,49 +99,19 @@ defmodule EyeSeeYou.Sentinels.Workers.SentinelWorker do
     %{state | last_check: check_result.timestamp, last_result: check_result, status: new_status}
   end
 
-  defp make_http_request(data) do
-    headers = format_headers(data.headers)
-    method = String.to_atom(String.downcase(data.method))
-    options = @default_http_options
-
-    try do
-      case do_request(method, data.url, headers, data.payload, options) do
-        {:ok, %{status_code: status_code, body: body}} ->
-          %{status_code: status_code, body: body, error: nil}
-
-        {:error, %{reason: reason}} ->
-          %{status_code: nil, body: nil, error: reason}
-      end
-    rescue
-      e -> %{status_code: nil, body: nil, error: Exception.message(e)}
-    end
+  defp get_protocol(_) do
+    HttpProtocol
   end
-
-  defp do_request(:get, url, headers, _payload, options) do
-    HTTPoison.get(url, headers, options)
-  end
-
-  defp do_request(method, url, headers, payload, options) when method in [:post, :put, :patch] do
-    apply(HTTPoison, method, [url, payload || "", headers, options])
-  end
-
-  defp do_request(method, url, headers, _payload, options) do
-    apply(HTTPoison, method, [url, headers, options])
-  end
-
-  defp format_headers(headers) when is_list(headers) do
-    Enum.map(headers, fn header -> {header["name"], header["value"]} end)
-  end
-
-  defp format_headers(_), do: []
 
   defp log_check_result(sentinel, result) do
     status = if result.success, do: "SUCCESS", else: "FAILURE"
 
-    Logger.info(
-      "Sentinel #{sentinel.name}(#{sentinel.uuid}): #{status} - " <>
-        "HTTP #{result.status_code} (expected: #{sentinel.config.data.expected_status}) " <>
-        "in #{result.duration_ms}ms"
-    )
+    log_message = "Sentinel #{sentinel.name}(#{sentinel.uuid}): #{status}"
+
+    expected = sentinel.config.data.expected_status
+
+    "#{log_message} - HTTP #{result.status_code} (expected: #{expected}) in #{result.duration_ms}ms"
+
+    Logger.info(log_message)
   end
 end

@@ -42,7 +42,7 @@ defmodule EyeSeeYouWeb.API.Sentinel.SentinelJSON do
     end
   end
 
-  defp render_config_data("http_request", data), do: render_http_request_data(data)
+  defp render_config_data("http", data), do: render_http_request_data(data)
 
   defp render_http_request_data(data) do
     base = %{

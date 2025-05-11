@@ -56,11 +56,12 @@ defmodule EyeSeeYou.MixProject do
       {:gettext, "~> 0.26"},
       {:httpoison, "~> 2.2"},
       {:jason, "~> 1.2"},
+      {:cachex, "~> 3.6"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:mock, "~> 0.3", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:cachex, "~> 3.6"}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -82,7 +83,9 @@ defmodule EyeSeeYou.MixProject do
         "tailwind eye_see_you --minify",
         "esbuild eye_see_you --minify",
         "phx.digest"
-      ]
+      ],
+      lint: ["format --check-formatted", "credo --strict", "dialyzer"],
+      run: "phx.server"
     ]
   end
 end

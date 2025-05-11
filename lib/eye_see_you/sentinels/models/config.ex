@@ -9,23 +9,37 @@ defmodule EyeSeeYou.Sentinels.Models.Config do
 
   @primary_key false
   embedded_schema do
-    field(:type, :string, default: "http_request")
+    field(:type, :string, default: "http")
     embeds_one(:data, HttpRequest, on_replace: :update)
   end
 
+  @spec changeset(
+          {map(),
+           %{
+             optional(atom()) =>
+               atom()
+               | {:array | :assoc | :embed | :in | :map | :parameterized | :supertype | :try,
+                  any()}
+           }}
+          | %{
+              :__struct__ => atom() | %{:__changeset__ => any(), optional(any()) => any()},
+              optional(atom()) => any()
+            },
+          %{optional(:__struct__) => none(), optional(atom() | binary()) => any()}
+        ) :: Ecto.Changeset.t()
   def changeset(config, attrs) do
-    type = attrs["type"] || attrs[:type] || "http_request"
+    type = attrs["type"] || attrs[:type]
 
     config
     |> cast(attrs, [:type])
     |> validate_required([:type])
-    |> validate_inclusion(:type, ["http_request"],
+    |> validate_inclusion(:type, ["http", "tcp", "udp"],
       message: "must be a supported configuration type"
     )
     |> maybe_cast_data(attrs, type)
   end
 
-  defp maybe_cast_data(changeset, _attrs, "http_request") do
+  defp maybe_cast_data(changeset, _attrs, "http") do
     changeset
     |> cast_embed(:data, with: &HttpRequest.changeset/2)
   end
