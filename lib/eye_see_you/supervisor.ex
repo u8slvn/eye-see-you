@@ -1,4 +1,8 @@
 defmodule EyeSeeYou.Supervisor do
+    @moduledoc """
+  Main supervisor for URL monitoring processes.
+  """
+
   use Supervisor
   require Logger
 
@@ -10,14 +14,15 @@ defmodule EyeSeeYou.Supervisor do
   def init({urls, check_interval}) do
     Logger.info("Starting EyeSeeYou monitors...")
 
-    children = Enum.map(urls, fn url ->
-      %{
-        id: {:url_monitor, url},
-        start: {EyeSeeYou.UrlMonitor, :start_link, [{url, check_interval}]},
-        restart: :permanent,
-        type: :worker
-      }
-    end)
+    children =
+      Enum.map(urls, fn url ->
+        %{
+          id: {:url_monitor, url},
+          start: {EyeSeeYou.UrlMonitor, :start_link, [{url, check_interval}]},
+          restart: :permanent,
+          type: :worker
+        }
+      end)
 
     Supervisor.init(children, strategy: :one_for_one)
   end

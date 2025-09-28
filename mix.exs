@@ -26,9 +26,11 @@ defmodule EyeSeeYou.MixProject do
 
   defp deps do
     [
-      {:httpoison, "~> 2.0"},
+      {:jason, "~> 1.4"},
+      {:httpoison, "~> 2.2"},
       {:gen_smtp, "~> 1.2"},
-      {:jason, "~> 1.4"}
+      # Ajouter cette ligne
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 end

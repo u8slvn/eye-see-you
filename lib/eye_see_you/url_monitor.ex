@@ -1,4 +1,7 @@
 defmodule EyeSeeYou.UrlMonitor do
+   @moduledoc """
+  GenServer that monitors a specific URL for changes and sends notifications.
+  """
   use GenServer
   require Logger
 
@@ -14,7 +17,8 @@ defmodule EyeSeeYou.UrlMonitor do
 
     state = %__MODULE__{
       url: url,
-      check_interval: check_interval * 1000, # Convert to milliseconds
+      # Convert to milliseconds
+      check_interval: check_interval * 1000,
       current_hash: nil
     }
 
@@ -53,11 +57,13 @@ defmodule EyeSeeYou.UrlMonitor do
   end
 
   defp fetch_url_content(url) do
-    case HTTPoison.get(url, [], [timeout: 30_000, recv_timeout: 30_000]) do
+    case HTTPoison.get(url, [], timeout: 30_000, recv_timeout: 30_000) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, body}
+
       {:ok, %HTTPoison.Response{status_code: status_code}} ->
         {:error, "HTTP #{status_code}"}
+
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end

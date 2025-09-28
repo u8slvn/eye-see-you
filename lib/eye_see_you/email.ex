@@ -1,4 +1,7 @@
 defmodule EyeSeeYou.Email do
+   @moduledoc """
+  Email notification functionality for website changes.
+  """
   require Logger
 
   def send_change_notification(url, old_hash, new_hash) do
@@ -41,20 +44,24 @@ defmodule EyeSeeYou.Email do
   defp send_email(subject, body) do
     config = get_email_config()
 
-    case :gen_smtp_client.send_blocking({
-      config.from,
-      [config.to],
-      "Subject: #{subject}\r\nFrom: #{config.from}\r\nTo: #{config.to}\r\n\r\n#{body}"
-    }, [
-      {:relay, config.server},
-      {:port, config.port},
-      {:username, config.username},
-      {:password, config.password},
-      {:tls, :always}
-    ]) do
+    case :gen_smtp_client.send_blocking(
+           {
+             config.from,
+             [config.to],
+             "Subject: #{subject}\r\nFrom: #{config.from}\r\nTo: #{config.to}\r\n\r\n#{body}"
+           },
+           [
+             {:relay, config.server},
+             {:port, config.port},
+             {:username, config.username},
+             {:password, config.password},
+             {:tls, :always}
+           ]
+         ) do
       {:ok, _} ->
         Logger.info("Notification sent successfully")
         :ok
+
       {:error, reason} ->
         Logger.error("Failed to send email: #{inspect(reason)}")
         {:error, reason}
