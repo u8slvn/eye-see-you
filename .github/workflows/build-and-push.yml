@@ -58,7 +58,7 @@ jobs:
       run: |
         echo "## EyeSeeYou Deployment Instructions" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Your EyeSeeYou Docker image has been built and pushed successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "EyeSeeYou Docker image has been built and pushed successfully!" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Run with Docker:" >> $GITHUB_STEP_SUMMARY
         echo '```bash' >> $GITHUB_STEP_SUMMARY

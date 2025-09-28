@@ -15,7 +15,6 @@ docker run -e URLS="https://example.com" \
            eye-see-you
 ```
 
-
 ```yaml
 version: '3'
 services:
