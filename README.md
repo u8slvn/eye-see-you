@@ -14,14 +14,14 @@ docker run -e URLS="https://example.com" \
            -e EMAIL_USER="your@email.com" \
            -e EMAIL_PASSWORD="password" \
            -e RECIPIENT_EMAIL="notify@email.com" \
-           eye-see-you
+           ghcr.io/u8slvn/eye-see-you:latest
 ```
 
 ```yaml
 version: '3'
 services:
   eye-see-you:
-    image: eye-see-you:latest
+    image: ghcr.io/u8slvn/eye-see-you:latest
     container_name: eye-see-you
     environment:
       - URLS=https://example.com,https://another-site.com
