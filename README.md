@@ -5,7 +5,9 @@
     <a href="https://github.com/u8slvn/eye-see-you"><img alt="GitHub License" src="https://img.shields.io/github/license/u8slvn/eye-see-you"></a>
 </p>
 
-Simply watch URLs and get notified when they change. Security Notice:** This is a personal tool designed for local/private network use. Not recommended for production environments.
+Simply watch URLs and get notified when they change.
+
+**Security Notice:** This is a personal tool designed for local/private network use. Not recommended for production environments.
 
 ```bash
 docker run -e URLS="https://example.com" \
