@@ -95,8 +95,12 @@ defmodule EyeSeeYou.Email do
         {:error, reason} ->
           Logger.error("SMTP error: #{inspect(reason)}")
 
-        other when is_binary(other) and other =~ "2.0.0 OK" ->
-          Logger.info("Email sent successfully! Gmail response: #{other}")
+        other when is_binary(other) ->
+          if String.contains?(other, "2.0.0 OK") do
+            Logger.info("Email sent successfully! Gmail response: #{other}")
+          else
+            Logger.error("Unexpected SMTP result: #{inspect(other)}")
+          end
 
         other ->
           Logger.error("Unexpected SMTP result: #{inspect(other)}")
