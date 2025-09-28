@@ -1,39 +1,66 @@
 defmodule EyeSeeYou.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
-
   use Application
+  require Logger
 
   @impl true
   def start(_type, _args) do
+    urls = get_urls_from_env()
+    check_interval = get_check_interval()
+
+    validate_config!()
+
+    Logger.info("Starting EyeSeeYou for #{length(urls)} URL(s)")
+    Logger.info("Check interval: #{check_interval} seconds")
+
     children = [
-      EyeSeeYouWeb.Telemetry,
-      EyeSeeYou.Repo,
-      {DNSCluster, query: Application.get_env(:eye_see_you, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: EyeSeeYou.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: EyeSeeYou.Finch},
-      {Registry, keys: :unique, name: EyeSeeYou.SentinelRegistry},
-      EyeSeeYou.Sentinels.Workers.SentinelSupervisor,
-      EyeSeeYou.Sentinels.Services.StatusCache,
-      # Initialize sentinels after all infrastructure is ready
-      {Task, &EyeSeeYou.Sentinels.init_sentinels/0},
-      # Start to serve requests, typically the last entry
-      EyeSeeYouWeb.Endpoint
+      {Registry, keys: :unique, name: EyeSeeYou.Registry},
+      {EyeSeeYou.Supervisor, {urls, check_interval}}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: EyeSeeYou.Supervisor]
+    opts = [strategy: :one_for_one, name: EyeSeeYou.Application]
     Supervisor.start_link(children, opts)
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  @impl true
-  def config_change(changed, _new, removed) do
-    EyeSeeYouWeb.Endpoint.config_change(changed, removed)
-    :ok
+  defp get_urls_from_env do
+    urls = case System.get_env("URLS") do
+      nil -> []
+      url_string ->
+        url_string
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+        |> Enum.reject(&(&1 == ""))
+    end
+
+    if Enum.empty?(urls) do
+      Logger.error("No URLs provided. Set the URLS environment variable.")
+      System.halt(1)
+    end
+
+    urls
+  end
+
+  defp get_check_interval do
+    case System.get_env("CHECK_INTERVAL", "300") do
+      interval_str ->
+        case Integer.parse(interval_str) do
+          {interval, ""} when interval > 0 -> interval
+          _ ->
+            Logger.error("Invalid CHECK_INTERVAL. Using default 300 seconds.")
+            300
+        end
+    end
+  end
+
+  defp validate_config! do
+    required_vars = ["SMTP_SERVER", "EMAIL_USER", "EMAIL_PASSWORD", "RECIPIENT_EMAIL"]
+
+    missing_vars = Enum.filter(required_vars, fn var ->
+      is_nil(System.get_env(var))
+    end)
+
+    unless Enum.empty?(missing_vars) do
+      Logger.error("Missing required environment variables: #{Enum.join(missing_vars, ", ")}")
+      System.halt(1)
+    end
   end
 end
